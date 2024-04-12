@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{env, str::FromStr};
 
 use async_tungstenite::{
     tokio::connect_async,
@@ -22,8 +22,8 @@ use tracing::level_filters::LevelFilter;
 
 #[tokio::main]
 async fn main() -> util::Result<()> {
-    const WS_ADDR: &str = "chatbotapi.itpcc.net";
-    const TOKEN: &str = "DekaAtPauseman";
+    let ws_addr = env::var("ws_addr").context(error::UnsupportEnvSnafu)?;
+    let token = env::var("token").context(error::UnsupportEnvSnafu)?;
 
     // Setup tracing
     let sub = tracing_subscriber::fmt()
@@ -47,14 +47,14 @@ async fn main() -> util::Result<()> {
 
     let local_worker = LocalSet::new();
     let ws_req = Request::builder()
-        .uri(format!("wss://{}/ws", WS_ADDR))
+        .uri(format!("wss://{}/ws", ws_addr))
         .method("GET")
-        .header("Host", WS_ADDR)
+        .header("Host", ws_addr)
         .header("Connection", "Upgrade")
         .header("Upgrade", "websocket")
         .header("Sec-WebSocket-Version", "13")
         .header("Sec-WebSocket-Key", client::generate_key())
-        .header("Authorization", format!("Bearer {}", TOKEN))
+        .header("Authorization", format!("Bearer {}", token))
         .body(())
         .context(error::HTTPSnafu)?;
 

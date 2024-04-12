@@ -1,19 +1,18 @@
-use std::io;
-
-use http;
 use snafu::{prelude::*, Report};
 
 #[derive(Debug, Snafu)]
 #[snafu(visibility(pub))]
 pub enum Error {
     #[snafu(display("path error"))]
-    PathEnv { source: io::Error },
+    PathEnv { source: std::io::Error },
     #[snafu(display("IO error"))]
     LevelFilterError {
         source: tracing::metadata::ParseLevelFilterError,
     },
     #[snafu(display("unsupport env"))]
-    UnsupportEnv,
+    UnsupportEnv {
+        source: std::env::VarError
+    },
     #[snafu(display("overflow error"))]
     Overflow,
     #[snafu(display("Str UTF-8 decode error"))]
@@ -61,7 +60,7 @@ pub enum Error {
         source: fantoccini::error::NewSessionError,
     },
     #[snafu(display("IO error"))]
-    IOError { source: io::Error },
+    IOError { source: std::io::Error },
     #[snafu(display("System Time error"))]
     SystemTimeError { source: std::time::SystemTimeError },
 }
